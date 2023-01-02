@@ -1,15 +1,25 @@
 import { ApolloServer, gql } from "apollo-server";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 
+import { users, quotes } from './fakedb.js'
+
 const typeDefs = gql`
   type Query{
-    greet: String
+    users: [User]
+  }
+
+  type User {
+    id: ID
+    firstName: String
+    lastName: String
+    email: String
+    password: String
   }
 `
 
 const resolvers = {
   Query: {
-    greet: () => "Hello world!"
+    users: () => users
   }
 }
 
