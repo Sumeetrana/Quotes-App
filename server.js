@@ -6,3 +6,9 @@ const typeDefs = gql`
     greet: String
   }
 `
+
+const resolvers = {
+  Query: {
+    greet: () => "Hello world!"
+  }
+}
