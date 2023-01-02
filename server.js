@@ -15,7 +15,10 @@ const resolvers = {
 
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
+  plugins: [
+    ApolloServerPluginLandingPageGraphQLPlayground
+  ]
 })
 
 server.listen().then(({ url }) => {
