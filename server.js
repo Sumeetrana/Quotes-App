@@ -6,20 +6,28 @@ import { users, quotes } from './fakedb.js'
 const typeDefs = gql`
   type Query{
     users: [User]
+    quotes: [Quote]
   }
 
   type User {
-    id: ID
+    id: ID!
     firstName: String
     lastName: String
     email: String
     password: String
   }
+
+  type Quote {
+    name: String
+    by: String
+  }
+  
 `
 
 const resolvers = {
   Query: {
-    users: () => users
+    users: () => users,
+    quotes: () => quotes
   }
 }
 
