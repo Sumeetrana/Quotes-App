@@ -15,3 +15,24 @@ query getAllQuotes {
     by
   }
 }
+
+--------------------------
+query getUserById {
+    user(id:"23132") {
+      id
+      firstName
+      lastName
+      email
+      quotes{
+        name
+      }
+    }
+  }
+
+--------------------------
+query getIndividualQuote {
+    iquote(by: "23132") {
+      name
+      by
+    }
+  }

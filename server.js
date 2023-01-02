@@ -6,7 +6,9 @@ import { users, quotes } from './fakedb.js'
 const typeDefs = gql`
   type Query{
     users: [User]
+    user(id: ID!): User
     quotes: [Quote]
+    iquote(by: ID!): [Quote]
   }
 
   type User {
@@ -28,10 +30,12 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     users: () => users,
-    quotes: () => quotes
+    user: (parent, args) => users.find(user => user.id === args.id), // parent will undefined here, because it is on root level
+    quotes: () => quotes,
+    iquote: (_, { by }) => quotes.filter(quote => quote.by === by)
   },
   User: {
-    quotes: (user) => quotes.filter(quote => quote.by === user.id)
+    quotes: (user) => quotes.filter(quote => quote.by === user.id) // here, 'user' is parent
   }
 }
 
