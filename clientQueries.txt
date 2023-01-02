@@ -29,6 +29,19 @@ query getUserById {
     }
   }
 
+-------------------------
+query getUserById($userId: ID!) {
+  user(id:$userId) {
+    id
+    firstName
+    lastName
+    email
+    quotes{
+      name
+    }
+  }
+}
+
 --------------------------
 query getIndividualQuote {
     iquote(by: "23132") {
@@ -36,3 +49,5 @@ query getIndividualQuote {
       by
     }
   }
+
+
