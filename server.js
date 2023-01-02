@@ -1,8 +1,25 @@
 import { ApolloServer, gql } from "apollo-server";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { randomBytes } from 'crypto';
+import mongoose from "mongoose";
 
-import { users, quotes } from './fakedb.js'
+import './models/User.js';
+import './models/Quote.js';
+import { users, quotes } from './fakedb.js';
+import { MONGO_URL } from './config.js';
+
+mongoose.connect(MONGO_URL, {
+  useNewUrlParser: true,
+})
+
+mongoose.connection.on("connected", () => {
+  console.log("DB connected successfully");
+})
+
+
+mongoose.connection.on("error", (err) => {
+  console.log("error connecting DB: ", err);
+})
 
 const typeDefs = gql`
   type Query{
