@@ -12,3 +12,8 @@ const resolvers = {
     greet: () => "Hello world!"
   }
 }
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers
+})
