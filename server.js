@@ -1,5 +1,6 @@
 import { ApolloServer, gql } from "apollo-server";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import { randomBytes } from 'crypto';
 
 import { users, quotes } from './fakedb.js'
 
@@ -25,6 +26,16 @@ const typeDefs = gql`
     by: String
   }
   
+  type Mutation {
+    signupUserDummy(newUser: UserInput!): User
+  }
+
+  input UserInput {
+    firstName: String!
+    lastName: String!
+    email: String!
+    password: String!
+  }
 `
 
 const resolvers = {
@@ -36,6 +47,16 @@ const resolvers = {
   },
   User: {
     quotes: (user) => quotes.filter(quote => quote.by === user.id) // here, 'user' is parent
+  },
+  Mutation: {
+    signupUserDummy: (_, { newUser }) => {
+      const id = randomBytes(5).toString('hex');
+      users.push({
+        id,
+        ...newUser
+      })
+      return users.find(user => user.id === id);
+    }
   }
 }
 

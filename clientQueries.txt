@@ -51,3 +51,12 @@ query getIndividualQuote {
   }
 
 
+---------------------------
+mutation createUser($newUser: UserInput!) {
+  signupUserDummy(newUser: $newUser) {
+    id,
+    email,
+    firstName,
+    lastName
+  }
+}
