@@ -1,15 +1,17 @@
 import { ApolloServer, gql } from "apollo-server";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
-import { randomBytes } from 'crypto';
 import mongoose from "mongoose";
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
-import './models/User.js';
-import './models/Quote.js';
+import User from './models/User.js';
+import Quote from './models/Quote.js';
 import { users, quotes } from './fakedb.js';
-import { MONGO_URL } from './config.js';
+import { JWT_SECRET, MONGO_URL } from './config.js';
 
 mongoose.connect(MONGO_URL, {
   useNewUrlParser: true,
+  useUnifiedTopology: true
 })
 
 mongoose.connection.on("connected", () => {
@@ -24,13 +26,13 @@ mongoose.connection.on("error", (err) => {
 const typeDefs = gql`
   type Query{
     users: [User]
-    user(id: ID!): User
+    user(_id: ID!): User
     quotes: [Quote]
     iquote(by: ID!): [Quote]
   }
 
   type User {
-    id: ID!
+    _id: ID!
     firstName: String
     lastName: String
     email: String
@@ -43,8 +45,13 @@ const typeDefs = gql`
     by: String
   }
   
+  type Token {
+    token: String
+  }
+
   type Mutation {
-    signupUserDummy(newUser: UserInput!): User
+    signupUser(newUser: UserInput!): User
+    signinUser(userDetails: UserSigninInput!): Token
   }
 
   input UserInput {
@@ -53,26 +60,51 @@ const typeDefs = gql`
     email: String!
     password: String!
   }
+
+  input UserSigninInput {
+    email: String!
+    password: String!
+  }
 `
 
 const resolvers = {
   Query: {
     users: () => users,
-    user: (parent, args) => users.find(user => user.id === args.id), // parent will undefined here, because it is on root level
+    user: (parent, args) => users.find(user => user._id === args._id), // parent will undefined here, because it is on root level
     quotes: () => quotes,
     iquote: (_, { by }) => quotes.filter(quote => quote.by === by)
   },
   User: {
-    quotes: (user) => quotes.filter(quote => quote.by === user.id) // here, 'user' is parent
+    quotes: (user) => quotes.filter(quote => quote.by === user._id) // here, 'user' is parent
   },
   Mutation: {
-    signupUserDummy: (_, { newUser }) => {
-      const id = randomBytes(5).toString('hex');
-      users.push({
-        id,
-        ...newUser
-      })
-      return users.find(user => user.id === id);
+    signupUser: async (_, { newUser }) => {
+      const user = await User.findOne({ email: newUser.email })
+      if (user) {
+        throw new Error("User already exists");
+      } else {
+        const hashedPassword = await bcrypt.hash(newUser.password, 10);
+        const newCreatedUser = new User({
+          ...newUser,
+          password: hashedPassword
+        })
+
+        return await newCreatedUser.save();
+      }
+    },
+    signinUser: async (_, { userDetails }) => {
+      const user = await User.findOne({ email: userDetails.email })
+      if (!user) {
+        throw new Error("User doesn't exist")
+      } else {
+        const doMatch = await bcrypt.compare(userDetails.password, user.password);
+        if (!doMatch) {
+          throw new Error("email or password is invalid")
+        }
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET);
+        console.log("Token: ", token);
+        return { token };
+      }
     }
   }
 }

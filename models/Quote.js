@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const quotesSchema = new mongoose.Schema({
+const quoteSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
@@ -12,4 +12,4 @@ const quotesSchema = new mongoose.Schema({
   },
 })
 
-mongoose.model("Quote", userSchema);
+export default mongoose.model("Quote", quoteSchema);
